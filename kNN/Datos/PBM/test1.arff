@@ -1,3 +1,48 @@
+@relation 'OCR'
+
+@attribute 1 numeric
+@attribute 2 numeric
+@attribute 3 numeric
+@attribute 4 numeric
+@attribute 5 numeric
+@attribute 6 numeric
+@attribute 7 numeric
+@attribute 8 numeric
+@attribute 9 numeric
+@attribute 10 numeric
+@attribute 11 numeric
+@attribute 12 numeric
+@attribute 13 numeric
+@attribute 14 numeric
+@attribute 15 numeric
+@attribute 16 numeric
+@attribute 17 numeric
+@attribute 18 numeric
+@attribute 19 numeric
+@attribute 20 numeric
+@attribute 21 numeric
+@attribute 22 numeric
+@attribute 23 numeric
+@attribute 24 numeric
+@attribute 25 numeric
+@attribute 26 numeric
+@attribute 27 numeric
+@attribute 28 numeric
+@attribute 29 numeric
+@attribute 30 numeric
+@attribute 31 numeric
+@attribute 32 numeric
+@attribute 33 numeric
+@attribute 34 numeric
+@attribute 35 numeric
+@attribute 36 numeric
+@attribute 37 numeric
+@attribute 38 numeric
+@attribute 39 numeric
+@attribute 40 numeric
+@attribute class {0,1,2,3,4,5,6,7,8,9}
+
+@data
 11 74 86 46 0 66 100 93 83 21 95 94 15 36 58 100 46 0 32 79 81 26 2 76 74 46 73 82 99 25 1 79 96 47 0 0 50 8 0 0 0 
 3 74 93 50 0 28 95 44 62 28 74 57 0 5 65 95 37 0 0 74 77 0 0 4 82 69 0 0 38 54 40 40 61 82 7 6 75 75 13 0 0 
 0 75 79 21 0 17 99 70 66 7 49 98 4 5 41 73 75 0 0 53 92 25 3 3 82 76 0 16 62 58 62 83 95 75 3 10 76 41 18 0 0 

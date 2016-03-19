@@ -5,7 +5,7 @@
 #include <string.h>
 #include <math.h>
 
-#define ERR_MSG printf("./k-NN k Distancia [test]\nk: (1, 3, 5)\nDistancia: e = Euclidea, a = Absoluta\nTest: t\n");
+#define ERR_MSG printf("./k-NN k Distancia [test/cpr]\nk: (1, 3, 5)\nDistancia: e = Euclidea, a = Absoluta\nTest: t\nCPR: c\n");
 #define EOL '\n'
 
 //Variables globales
@@ -15,15 +15,9 @@ struct nClass{
 	float d;	
 	int c;
 };
-//Votos por clase y distancia media
-struct rClass{
-	int v;
-	int c;
-	float dm;
-};
 
 //Declaracion funciones
-void checkArgs(int arg, char *argv[], int *k, int *opt, FILE **tra_file, FILE **test_file);
+void checkArgs(int arg, char *argv[], int *k, int *m, int *opt, FILE **tra_file, FILE **test_file, FILE **cpr_file);
 float dEuclidea(int *tra_data, int *data_in);
 float dAbsoluta(int *tra_data, int *data_in);
 void insertClass(struct nClass class_val, struct nClass *minD_class, int k);
@@ -31,27 +25,31 @@ int resultClass(struct nClass *minD_class, int k);
 int read_vector(int *vector, FILE *file);
 void init_confMat(int mat[10][10]);
 void printConfMat(int mat[10][10]);
+void writeVectorCPR(FILE *file, int data_in[41]);
 
 
 //MAIN
 int main(int argc, char *argv[]){
-	FILE *tra_file, *test_file;		//Ficheros base de datos
-	int i, k, opt;					//Variables, k:Parametro, c: Nº de elementos en el struct
-	int ac, er;						//Aciertos, errores
-	int conf_mat[10][10];			//Matriz de confusion
-	int tra_data[41], test_data[41];//Vector de datos de entrada y un valor de la B.D.
+	FILE *tra_file, *test_file, *cpr_file;			//Ficheros base de datos
+	int i, k, m, opt;								//Variables, k:Parametro, c: Nº de elementos en el struct, modo: 
+	int ac, er;										//Aciertos, errores
+	int conf_mat[10][10];							//Matriz de confusion
+	int tra_data[41], test_data[41], cpr_data[41];	//Vector de datos de entrada y un valor de la B.D.
 
 	//Prueba
 	int data_in[41] = {100, 100, 0, 100, 100, 66, 100, 93, 83, 85, 95, 94, 76, 90, 58, 100, 46, 0, 32, 79, 81, 26, 85, 76, 74, 46, 73, 82, 99, 25, 100, 79, 96, 47, 0, 0, 50, 8, 0, 0, 0};
 
-	checkArgs(argc, argv, &k, &opt, &tra_file, &test_file);
+	checkArgs(argc, argv, &k, &m, &opt, &tra_file, &test_file, &cpr_file);
 
 	//Reservar espacio para el array de structs
 	struct nClass class_val;		//Estructura que almacena distancia y clase
-	struct nClass minD_class[k];	//Array de struct que almacena los 5 elementos mas cercanos 
+	struct nClass minD_class[k];	//Array de struct que almacena los 5 elementos mas cercanos
+
+	ac = 0;
+	er = 0; 
 
 	//Ejecucion modo foto
-	if(argc == 3){
+	if(m == 0){
 		c = 0;
 		while(read_vector(tra_data, tra_file) == 0){
 			if(opt == 0){
@@ -72,9 +70,7 @@ int main(int argc, char *argv[]){
 		printf("\nEs un: %d\n", resultClass(minD_class, k));
 	}
 	//Ejecucion modo Test
-	else{
-		ac = 0;
-		er = 0;
+	else if(m == 1){
 		init_confMat(conf_mat);
 		while(read_vector(test_data, test_file) == 0){
 			c = 0;
@@ -102,16 +98,45 @@ int main(int argc, char *argv[]){
 		printf("\nAciertos: %d\nErrores:  %d\n", ac, er);
 		fclose(test_file);
 	}
+	//Ejecucion modo CPR
+	else if(m == 2){
+		for(i = 0; i < 10; i ++){
+			ac = 0;
+			fseek(tra_file, 0, SEEK_SET);
+			while(read_vector(tra_data, tra_file) == 0){
+				c = 0;
+				fseek(cpr_file, 0, SEEK_SET);
+				while(read_vector(cpr_data, cpr_file) == 0){
+					if(opt == 0){
+						class_val.d = dEuclidea(tra_data, cpr_data);
+					}
+					else{
+						class_val.d = dAbsoluta(tra_data, cpr_data);
+					}
+					class_val.c = cpr_data[40];
+
+					insertClass(class_val, minD_class, k);
+				}
+				if(resultClass(minD_class, c) == tra_data[40]){
+					ac++;
+				}
+				else{
+					er++;
+					writeVectorCPR(cpr_file, tra_data);
+				}
+			}
+		}
+		printf("Datos añadidos al CPR: %d de %d\n", er, ac);
+		fclose(cpr_file);
+	}
 
 	fclose(tra_file);
 	return 0;
 }
 
 
-
-
 //FUNCIONES
-void checkArgs(int argc, char *argv[], int *k, int *opt, FILE **tra_file, FILE **test_file){
+void checkArgs(int argc, char *argv[], int *k, int *m, int *opt, FILE **tra_file, FILE **test_file, FILE **cpr_file){
 	//Comprobar argumentos
 	if(argc < 3 || argc > 5){
 		ERR_MSG
@@ -136,27 +161,40 @@ void checkArgs(int argc, char *argv[], int *k, int *opt, FILE **tra_file, FILE *
 		ERR_MSG
 		exit(-1);
 	}
+
+	//Abrir ficheros de training
+	if((*tra_file = fopen("Datos/tra.car", "r")) < 0){
+		printf("Error al abrir fichero de training.\n");
+		exit(-1);
+	}
 	
-	//Abrir ficheros test
+	*m = 0;
+	//Modo test/cpr
 	if(argc == 4){
 		if((!strcmp(argv[3],"t"))){
+			*m = 1;
 			//Abrir fichero test
-			*test_file = fopen("Datos/test1.car", "r");
-			if(*test_file < 0){
+			if((*test_file = fopen("Datos/test1.car", "r")) < 0){
 				printf("Error al abrir fichero de test.\nNombre: test.vec\nFormato: Leer manual.txt\n");
 				exit(-1);
 			}
+		}
+		//Abrir fichero CPR
+		else if((!strcmp(argv[3],"c"))){
+			*m = 2;
+			if((*cpr_file = fopen("Datos/cpr.car", "w+")) < 0){
+				printf("Error al crear fichero CPR.\nNombre: cpr.car\nFormato: Leer manual.txt\n");
+				exit(-1);
+			}
+			int cpr_data[41];
+			read_vector(cpr_data, *tra_file);
+			writeVectorCPR(*cpr_file, cpr_data);
+
 		}
 		else{
 			ERR_MSG
 			exit(-1);
 		}
-	}
-	
-	//Abrir ficheros de training
-	if((*tra_file = fopen("Datos/tra.car", "r")) < 0){
-		printf("Error al abrir fichero de training.\n");
-		exit(-1);
 	}
 }
 
@@ -213,19 +251,18 @@ void insertClass(struct nClass class_val, struct nClass *minD_class, int k){
 }
 
 int resultClass(struct nClass *minD_class, int k){
-	int balioak[10]={0,0,0,0,0,0,0,0,0,0};
-	int i;
-	for(i=0;i<k;i++){
-		balioak[minD_class[i].c]++;
+	int class[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+	int i, pos, max;
+
+	for(i = 0; i < k; i++){
+		class[minD_class[i].c]++;
 	}
 
-	int max=-1;
-	int pos;
-
-	for(i=0;i<10;i++){
-		if(balioak[i]>max){
-			max=balioak[i];
-			pos=i;
+	max = -1;
+	for(i = 0; i < 10; i++){
+		if(class[i] > max){
+			max = class[i];
+			pos = i;
 		}
 	}
 	return pos;
@@ -275,5 +312,15 @@ void printConfMat(int mat[10][10]){
 		}
 		printf(":%d\n", i);
 	}
+}
+
+void writeVectorCPR(FILE *file, int data_in[41]){
+	int i;
+
+	for(i = 0; i < 41; i++){
+		fprintf(file, "%d ", data_in[i]);
+	}
+	fprintf(file, "\n");
+	fflush(file);
 }
 
