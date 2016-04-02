@@ -17,7 +17,7 @@ struct nClass{
 };
 
 //Declaracion funciones
-void checkArgs(int arg, char *argv[], int *k, int *m, int *opt, FILE **tra_file, FILE **test_file, FILE **cpr_file);
+void checkArgs(int argc, char *argv[], int *k, int *m, int *opt, FILE **tra_file, FILE **test_file, FILE **cpr_file, FILE **photo_file);
 float dEuclidea(int *tra_data, int *data_in);
 float dAbsoluta(int *tra_data, int *data_in);
 void insertClass(struct nClass class_val, struct nClass *minD_class, int k);
@@ -37,7 +37,7 @@ int main(int argc, char *argv[]){
 	int tra_data[41], test_data[41], cpr_data[41];	//Vector de datos de entrada y un valor de la B.D.
 
 	//Prueba
-	int data_in[40] = {100, 100, 0, 100, 100, 66, 100, 93, 83, 85, 95, 94, 76, 90, 58, 100, 46, 0, 32, 79, 81, 26, 85, 76, 74, 46, 73, 82, 99, 25, 100, 79, 96, 47, 0, 0, 50, 8, 0, 0, 0};
+	int data_in[40];
 
 	checkArgs(argc, argv, &k, &m, &opt, &tra_file, &test_file, &cpr_file, &photo_file);
 
@@ -50,7 +50,7 @@ int main(int argc, char *argv[]){
 
 	//Ejecucion modo foto
 	if(m == 0){
-		read_vector(data_in, tra_file)
+		read_vector(data_in, photo_file);
 		c = 0;
 		while(read_vector(tra_data, tra_file) == 0){
 			if(opt == 0){
@@ -137,7 +137,7 @@ int main(int argc, char *argv[]){
 
 
 //FUNCIONES
-void checkArgs(int argc, char *argv[], int *k, int *m, int *opt, FILE **tra_file, FILE **test_file, FILE **cpr_file, **photo_file){
+void checkArgs(int argc, char *argv[], int *k, int *m, int *opt, FILE **tra_file, FILE **test_file, FILE **cpr_file, FILE **photo_file){
 	//Comprobar argumentos
 	if(argc < 3 || argc > 5){
 		ERR_MSG
