@@ -30,16 +30,16 @@ void writeVectorCPR(FILE *file, int data_in[41]);
 
 //MAIN
 int main(int argc, char *argv[]){
-	FILE *tra_file, *test_file, *cpr_file;			//Ficheros base de datos
+	FILE *tra_file, *test_file, *cpr_file, *photo_file;			//Ficheros base de datos
 	int i, k, m, opt;								//Variables, k:Parametro, c: Nº de elementos en el struct, modo: 
 	int ac, er;										//Aciertos, errores
 	int conf_mat[10][10];							//Matriz de confusion
 	int tra_data[41], test_data[41], cpr_data[41];	//Vector de datos de entrada y un valor de la B.D.
 
 	//Prueba
-	int data_in[41] = {100, 100, 0, 100, 100, 66, 100, 93, 83, 85, 95, 94, 76, 90, 58, 100, 46, 0, 32, 79, 81, 26, 85, 76, 74, 46, 73, 82, 99, 25, 100, 79, 96, 47, 0, 0, 50, 8, 0, 0, 0};
+	int data_in[40] = {100, 100, 0, 100, 100, 66, 100, 93, 83, 85, 95, 94, 76, 90, 58, 100, 46, 0, 32, 79, 81, 26, 85, 76, 74, 46, 73, 82, 99, 25, 100, 79, 96, 47, 0, 0, 50, 8, 0, 0, 0};
 
-	checkArgs(argc, argv, &k, &m, &opt, &tra_file, &test_file, &cpr_file);
+	checkArgs(argc, argv, &k, &m, &opt, &tra_file, &test_file, &cpr_file, &photo_file);
 
 	//Reservar espacio para el array de structs
 	struct nClass class_val;		//Estructura que almacena distancia y clase
@@ -50,6 +50,7 @@ int main(int argc, char *argv[]){
 
 	//Ejecucion modo foto
 	if(m == 0){
+		read_vector(data_in, tra_file)
 		c = 0;
 		while(read_vector(tra_data, tra_file) == 0){
 			if(opt == 0){
@@ -136,7 +137,7 @@ int main(int argc, char *argv[]){
 
 
 //FUNCIONES
-void checkArgs(int argc, char *argv[], int *k, int *m, int *opt, FILE **tra_file, FILE **test_file, FILE **cpr_file){
+void checkArgs(int argc, char *argv[], int *k, int *m, int *opt, FILE **tra_file, FILE **test_file, FILE **cpr_file, **photo_file){
 	//Comprobar argumentos
 	if(argc < 3 || argc > 5){
 		ERR_MSG
@@ -175,7 +176,7 @@ void checkArgs(int argc, char *argv[], int *k, int *m, int *opt, FILE **tra_file
 			*m = 1;
 			//Abrir fichero test
 			if((*test_file = fopen("Datos/test1.car", "r")) < 0){
-				printf("Error al abrir fichero de test.\nNombre: test.vec\nFormato: Leer manual.txt\n");
+				printf("Error al abrir fichero de test.\nNombre: test1.car\nFormato: Leer manual.txt\n");
 				exit(-1);
 			}
 		}
@@ -195,6 +196,12 @@ void checkArgs(int argc, char *argv[], int *k, int *m, int *opt, FILE **tra_file
 			ERR_MSG
 			exit(-1);
 		}
+	}
+	else{
+		if((*photo_file = fopen("Datos/photo.car", "r")) < 0){
+				printf("Error al abrir foto.\nNombre: photo.car\nFormato: Leer manual.txt\n");
+				exit(-1);
+			}
 	}
 }
 
